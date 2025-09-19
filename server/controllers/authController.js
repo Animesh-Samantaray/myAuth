@@ -33,15 +33,18 @@ export const register = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        const mailOptions = {
-            from:process.env.SENDER_EMAIL,
-            to:email,
-            subject:`Hii ${name} , WELCOME to our  platform 
-            Your account created with email: ${email}
-            Thank You
-            ANimesh
-            `
+       const mailOptions = {
+  from: process.env.SENDER_EMAIL,
+  to: email,
+  subject: `🎉 Welcome to Our Platform, ${name}!`,
+  text: `Hi ${name},
+
+        Welcome aboard! Your account has been successfully created with the email: ${email} ✅
+
+        Thanks & Regards,  
+        Animesh`
         }
+
         await transporter.sendMail(mailOptions);
         return res.json({success:true , message:'User registered successfully 😊'})
     } catch (err) {
@@ -98,5 +101,61 @@ export const logout = async(req,res)=>{
     }
 }
 export const sendVerifyOtp= async(req,res)=>{
+    try{
+        const {userId} = req.body;
 
+        const user = await usermodel.findById(userId);
+
+        if(user.isAccountVerified){
+            return res.json({success:false , message:'Account already verified'});
+        }
+        const otp = String(Math.floor(1000000*Math.random()));
+
+        user.verifyOtp = otp;
+        user.verifyOtpExpireAt=Date.now()+24*60*60*1000;
+
+        await user.save();
+            const mailOptions = {
+            from:process.env.SENDER_EMAIL,
+            to:email,
+            subject:'Verification otp sent',
+            text:`Hii ${user.name} , Your verification otp is : ${otp}
+            `
+        }
+        await transporter.sendMail(mailOptions);
+        return res.json({success:true , message:'verification otp sent on email '})
+
+    }
+    catch(err){
+        res.json({success:false , message:err.message});
+    }
 } 
+
+export default verifyAmail=async(req,res)=>{
+    const {userId,otp}  = req.body;
+
+    if(!user || !otp){
+        return res.json({success:false , message:'Missing Verification Detaails'});
+    }
+
+    const user = usermodel.findById(userId);
+
+    if(!user){
+        return res.json({success:false , message:'User doesnot exist'});
+    }
+
+    if(user.verifyOtp=='' || user.verifyOtp!=otp){
+        return res.json({success:false , message:'Invalid otp'});
+    }
+
+    if(user.verifyOtpExpireAt < Date.now()){
+        return res.json({success:false , message:'Otp has been expired'});
+    }
+
+    user.isAccountVerified=true;
+    user.verifyOtp='';
+    user.verifyOtpExpireAt=0;
+    await user.save();
+    return res.json({success:true , message:'User verified successfully'});
+
+}
