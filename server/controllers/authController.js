@@ -3,6 +3,8 @@ import usermodel from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie-parser';
 import transporter from '../config/nodemailer.js';
+
+
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -52,6 +54,8 @@ export const register = async (req, res) => {
     }
 };
 
+
+
 export const login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -87,9 +91,11 @@ export const login = async (req, res) => {
 };
 
 
+
+
 export const logout = async(req,res)=>{
     try{
-        res.clearCookie('token', token, {
+        res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
@@ -100,29 +106,33 @@ export const logout = async(req,res)=>{
         return res.json({ success: false, message: error.message })
     }
 }
+
+
+
 export const sendVerifyOtp= async(req,res)=>{
     try{
-        const {userId} = req.body;
+        const {userId} = req.user;
 
         const user = await usermodel.findById(userId);
 
         if(user.isAccountVerified){
             return res.json({success:false , message:'Account already verified'});
         }
-        const otp = String(Math.floor(1000000*Math.random()));
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
 
         user.verifyOtp = otp;
-        user.verifyOtpExpireAt=Date.now()+24*60*60*1000;
+        user.verifyOtpExpireAt=Date.now()+60*1000;
 
         await user.save();
             const mailOptions = {
             from:process.env.SENDER_EMAIL,
-            to:email,
+            to:user.email,
             subject:'Verification otp sent',
             text:`Hii ${user.name} , Your verification otp is : ${otp}
             `
         }
-        await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions).then(info => console.log('Email sent:', info))
+    .catch(err => console.log('Error sending email:', err));
         return res.json({success:true , message:'verification otp sent on email '})
 
     }
@@ -131,17 +141,24 @@ export const sendVerifyOtp= async(req,res)=>{
     }
 } 
 
-export default verifyAmail=async(req,res)=>{
-    const {userId,otp}  = req.body;
 
-    if(!user || !otp){
-        return res.json({success:false , message:'Missing Verification Detaails'});
+
+export const verifyEmail=async(req,res)=>{
+     const { otp  } = req.body;      
+    const { userId } = req.user;    
+
+    if(!userId || !otp){
+        return res.json({success:false , message:'Missing Verification Details'});
     }
 
-    const user = usermodel.findById(userId);
-
+    const user = await usermodel.findById(userId);
+   
     if(!user){
         return res.json({success:false , message:'User doesnot exist'});
+    }
+
+    if(user.isVerified){
+        return res.json({success:false , message:'User already verified'});
     }
 
     if(user.verifyOtp=='' || user.verifyOtp!=otp){
@@ -152,10 +169,45 @@ export default verifyAmail=async(req,res)=>{
         return res.json({success:false , message:'Otp has been expired'});
     }
 
-    user.isAccountVerified=true;
+    user.isVerified=true;
     user.verifyOtp='';
     user.verifyOtpExpireAt=0;
     await user.save();
-    return res.json({success:true , message:'User verified successfully'});
 
+    return res.json({success:true , message:'User verified successfully'});
+}
+
+
+export const changePassword = async(req,res)=>{
+    const {email , oldPassword, newPassword} = req.body;
+
+    if(!email || !oldPassword || !newPassword){
+        return res.json({success:flase , message:'email , otp , password required'});   
+    }
+
+    try{
+        const user = await usermodel.findOne({email});
+        if(!user){
+            return res.json({success:false , message:'User not found'});
+        }
+
+        if(!user.isVerified){
+            return res.json({success:false , message:'You are not verified'});
+        }
+
+            const k =await bcrypt.compare(oldPassword , user.password);
+        if(!k){
+                return res.json({success:false , message:'Wrong password'});
+
+        }
+        const hashedPassword = await bcrypt.hash(newPassword,10);
+        user.password = hashedPassword;
+        await user.save();
+        return res.json({success:true , message:'Password Changed'});
+       
+
+    }
+    catch(err){
+        res.json({success:false ,message:err.message});
+    }
 }

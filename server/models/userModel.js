@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:''
     },
-    verifyOtpExpiresAt:{
+    verifyOtpExpireAt:{
         type:Number,
         default:0
     },
@@ -27,10 +27,14 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    resetOtp:{
-        type:String,
-        default:''
-    },
+    // resetOtp:{
+    //     type:String,
+    //     default:''
+    // },
+    // resetOtpExpireAt:{
+    //     type:Number,
+    //     default:0
+    // }
     
 });
 
