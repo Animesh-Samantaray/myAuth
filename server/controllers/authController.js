@@ -115,7 +115,7 @@ export const sendVerifyOtp= async(req,res)=>{
 
         const user = await usermodel.findById(userId);
 
-        if(user.isAccountVerified){
+        if(user.isVerified){
             return res.json({success:false , message:'Account already verified'});
         }
         const otp = String(Math.floor(100000 + Math.random() * 900000));
@@ -209,5 +209,69 @@ export const changePassword = async(req,res)=>{
     }
     catch(err){
         res.json({success:false ,message:err.message});
+    }
+}
+
+export const sendResetOtp= async(req,res)=>{
+    try{
+        const {userId} = req.user;
+
+        const user = await usermodel.findById(userId);
+
+        if(!user.isVerified){
+            return res.json({success:false , mesage:'You are not verified user '})
+        }
+
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+        user.resetOtp = otp;
+        user.resetOtpExpireAt=Date.now()+60*1000;
+
+        await user.save();
+            const mailOptions = {
+            from:process.env.SENDER_EMAIL,
+            to:user.email,
+            subject:'Password reset otp sent',
+            text:`Hii ${user.name} , Your verification otp is : ${otp}
+            `
+        }
+        await transporter.sendMail(mailOptions);
+        return res.json({success:true , message:'verification otp sent on email '})
+
+    }
+    catch(err){
+        res.json({success:false , message:err.message});
+    }
+} 
+
+export const resetPassword = async(req,res)=>{
+    const {userId} = req.user;
+    const {newPassword , otp} = req.body;
+
+    if(!otp || !newPassword){
+        return res.json({success:false , message:'Missing Verification Details'});
+    }
+
+    try{
+    const user = await usermodel.findById(userId);
+    if(!user){
+        return res.json({success:false , message:'User doesnot exist'});
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword , 10);
+    if(Date.now() > user.resetOtpExpireAt){
+                return res.json({success:false , message:'otp expired'});
+    }
+
+    user.password = hashedPassword;
+    user.resetOtp='';
+    user.resetOtpExpireAt=0;
+
+    await user.save();
+
+    res.json({success:true , message:'Password changed '})
+    }
+    catch(err){
+        res.json({success:false , message:err.message});
     }
 }

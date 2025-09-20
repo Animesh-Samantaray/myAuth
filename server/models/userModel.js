@@ -27,14 +27,14 @@ const userSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    // resetOtp:{
-    //     type:String,
-    //     default:''
-    // },
-    // resetOtpExpireAt:{
-    //     type:Number,
-    //     default:0
-    // }
+    resetOtp:{
+        type:String,
+        default:''
+    },
+    resetOtpExpireAt:{
+        type:Number,
+        default:0
+    }
     
 });
 
