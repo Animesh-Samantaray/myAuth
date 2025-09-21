@@ -275,3 +275,18 @@ export const resetPassword = async(req,res)=>{
         res.json({success:false , message:err.message});
     }
 }
+
+export const isVerified=async(req,res)=>{
+    const {userId} = req.user;
+    try{
+        const user = await usermodel.findById(userId);
+        if(!user){
+        return res.json({success:false , message:'User doesnot exist'});
+        }
+
+        return res.json({ success:true , result:user.isVerified});
+    }
+    catch(err){
+        res.json({success:false , message:err.message});
+    }
+}
