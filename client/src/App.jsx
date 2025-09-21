@@ -7,12 +7,13 @@ import ResetPassword from './pages/ResetPassword';
 import EmailVerify from './pages/EmailVerify';
 import {ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import MyAppToast from './components/MyAppToast';
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-            <ToastContainer position="top-right" autoClose={3000} />
+            <MyAppToast />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />

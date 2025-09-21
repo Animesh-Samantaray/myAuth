@@ -3,6 +3,7 @@ import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const {
@@ -14,6 +15,22 @@ const Navbar = () => {
     getUserData,
   } = useContext(AppContext);
   const navigate = useNavigate();
+
+const sendVerificationOtp = async(req,res)=>{
+  try{
+    axios.defaults.withCredentials=true;
+const { data } = await axios.post(`${backendUrl}/api/auth/send-verify-otp`, {}, { withCredentials: true });
+
+   if (data?.success) {
+      toast.success(data.message || 'OTP sent successfully!');
+      navigate('/email-verify');
+    } else {
+      toast.error(data.message || 'Failed to send OTP');
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.message || err.message);
+  }
+}
 
   return (
     <nav className="flex items-center justify-between px-8 py-4 bg-gradient-to-r from-indigo-50 via-white to-purple-50 shadow-md sticky top-0 z-50">
@@ -50,6 +67,7 @@ const Navbar = () => {
             {!userData.isAccountVerified && (
               <button
                 className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-800 font-semibold rounded-lg shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all"
+                onClick={sendVerificationOtp}
               >
                 Verify
               </button>
