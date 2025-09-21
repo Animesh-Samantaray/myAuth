@@ -2,25 +2,28 @@
 # Node.js (server)
 # ========================
 node_modules/
-
+client/node_modules/
 
 # Environment variables
 .env
 .env.local
 .env.*.local
+client/.env
+client/.env.local
+client/.env.*.local
 
 # Logs
 logs
-
 
 # Build output
 dist/
 build/
 .cache/
 .tmp/
-
-
-
+client/dist/
+client/build/
+client/.cache/
+client/.tmp/
 
 # ========================
 # IDE & System files
@@ -31,5 +34,3 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-
-

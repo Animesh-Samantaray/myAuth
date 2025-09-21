@@ -1,78 +1,76 @@
 import React, { useState , useContext} from "react";
-import { FaUser } from "react-icons/fa"; // person icon
+import { FaUser } from "react-icons/fa"; 
 import axios from 'axios';
-import { MdEmail } from "react-icons/md"; // email icon
-import { RiLockPasswordLine } from "react-icons/ri"; // password icon
+import { MdEmail } from "react-icons/md"; 
+import { RiLockPasswordLine } from "react-icons/ri"; 
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
-import { getUserData } from "../../../server/controllers/userController";
+
 const Login = () => {
   const [state, setState] = useState("sign up");
   const[email,setEmail] = useState('');
-    const[name,setName] = useState('');
-      const[password,setPassword] = useState('');
-      const navigate = useNavigate();
-      const {backendUrl,isLoggedin,setIsLoggedin} = useContext(AppContext);
+  const[name,setName] = useState('');
+  const[password,setPassword] = useState('');
+  const navigate = useNavigate();
+  const {backendUrl,isLoggedin,setIsLoggedin , getUserData} = useContext(AppContext);
 
-      const onSubmitHandle= async(e)=>{
-        try{
-          e.preventDefault();
-          axios.defaults.withCredentials=true;
+  const onSubmitHandle= async(e)=>{
+    try{
+      e.preventDefault();
+      axios.defaults.withCredentials=true;
 
-          if(state==='sign up'){
-          const {data}= await axios.post(backendUrl+'/api/auth/register' , {
-              name,email,password
-            });
+      if(state==='sign up'){
+        const {data}= await axios.post(backendUrl+'/api/auth/register' , {
+          name,email,password
+        });
 
-            if(data.success){
-              setIsLoggedin(true);
-              getUserData();
-              navigate('/');
-            }
-            else{
-              toast.error(data.message)
-            }
-          }else{
-            const {data}= await axios.post(backendUrl+'/api/auth/login' , {
-              email,password
-            });
-
-            if(data.success){
-              setIsLoggedin(true);
-              getUserData();
-              navigate('/');
-            }
-            else{
-              toast.error(data.message)
-            }
-          }
+        if(data.success){
+          setIsLoggedin(true);
+          getUserData();
+          navigate('/');
         }
-        catch(err){
-          toast.error(data.message);
+        else{
+          toast.error(data.message)
+        }
+      }else{
+        const {data}= await axios.post(backendUrl+'/api/auth/login' , {
+          email,password
+        });
+
+        if(data.success){
+          setIsLoggedin(true);
+          getUserData();
+          navigate('/');
+        }
+        else{
+          toast.error(data.message)
         }
       }
-
+    }
+    catch(err){
+      toast.error("Something went wrong");
+    }
+  }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-100">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-blue-100">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-10 border border-gray-100">
+        
         {/* Titles */}
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
+        <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-3">
           {state === "sign up" ? "Create Account" : "Welcome Back"}
         </h1>
-        <p className="text-center text-gray-500 mb-6">
+        <p className="text-center text-gray-500 mb-8 text-sm">
           {state === "sign up"
-            ? "Create your account here"
-            : "Login to your account"}
+            ? "Sign up to get started with your journey"
+            : "Login to continue your experience"}
         </p>
 
         {/* Form */}
-        <form className="space-y-4"
-        onSubmit={onSubmitHandle}
-        >
+        <form className="space-y-5" onSubmit={onSubmitHandle}>
           {state === "sign up" && (
-            <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+            <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500 transition">
               <FaUser className="text-gray-400 mr-3 text-lg" />
               <input
                 type="text"
@@ -80,16 +78,14 @@ const Login = () => {
                 value={name}
                 required
                 placeholder="Full Name"
-                className="w-full outline-none text-gray-700"
-                onChange={(e)=>{
-                  setName(e.target.value)
-                }}
+                className="w-full outline-none text-gray-700 text-sm"
+                onChange={(e)=> setName(e.target.value)}
               />
             </div>
           )}
 
           {/* Email Input */}
-          <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+          <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500 transition">
             <MdEmail className="text-gray-400 mr-3 text-lg" />
             <input
               type="email"
@@ -97,15 +93,13 @@ const Login = () => {
               value={email}
               required
               placeholder="Email Address"
-              className="w-full outline-none text-gray-700"
-              onChange={(e)=>{
-                  setEmail(e.target.value)
-                }}
+              className="w-full outline-none text-gray-700 text-sm"
+              onChange={(e)=> setEmail(e.target.value)}
             />
           </div>
 
           {/* Password Input */}
-          <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+          <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500 transition">
             <RiLockPasswordLine className="text-gray-400 mr-3 text-lg" />
             <input
               type="password"
@@ -113,43 +107,40 @@ const Login = () => {
               value={password}
               required
               placeholder="Enter Password"
-              className="w-full outline-none text-gray-700"
-              onChange={(e)=>{
-                  setPassword(e.target.value)
-                }}
+              className="w-full outline-none text-gray-700 text-sm"
+              onChange={(e)=> setPassword(e.target.value)}
             />
           </div>
 
           {/* Forgot Password */}
-          {
-          state==='login' &&
-          <div className="text-right">
-            <button
-              type="button"
-              className="text-sm text-blue-600 hover:underline cursor-pointer"
-              onClick={()=>navigate('/reset-password')}
-            >
-              Forgot password?
-            </button>
-          </div>
-          }
+          {state==='login' && (
+            <div className="text-right">
+              <button
+                type="button"
+                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition"
+                onClick={()=>navigate('/reset-password')}
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+            className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow-md hover:shadow-xl hover:scale-[1.02] active:scale-95 font-semibold transition-all duration-200"
           >
             {state === "sign up" ? "Sign Up" : "Login"}
           </button>
         </form>
 
         {/* Switch Mode */}
-        <div className="mt-6 text-center text-gray-600">
+        <div className="mt-8 text-center text-gray-600 text-sm">
           {state === "sign up" ? (
             <p>
               Already have an account?{" "}
               <button
-                className="text-blue-600 font-semibold hover:underline"
+                className="text-indigo-600 font-semibold hover:underline"
                 onClick={() => setState("login")}
               >
                 Log In
@@ -159,7 +150,7 @@ const Login = () => {
             <p>
               Don’t have an account?{" "}
               <button
-                className="text-blue-600 font-semibold hover:underline"
+                className="text-indigo-600 font-semibold hover:underline"
                 onClick={() => setState("sign up")}
               >
                 Sign Up
