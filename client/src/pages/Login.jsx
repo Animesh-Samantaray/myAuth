@@ -118,7 +118,7 @@ const Login = () => {
               <button
                 type="button"
                 className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition"
-                onClick={()=>navigate('/reset-password')}
+               
               >
                 Forgot password?
               </button>

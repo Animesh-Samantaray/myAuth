@@ -178,45 +178,13 @@ export const verifyEmail=async(req,res)=>{
 }
 
 
-export const changePassword = async(req,res)=>{
-    const {email , oldPassword, newPassword} = req.body;
 
-    if(!email || !oldPassword || !newPassword){
-        return res.json({success:flase , message:'email , otp , password required'});   
-    }
-
-    try{
-        const user = await usermodel.findOne({email});
-        if(!user){
-            return res.json({success:false , message:'User not found'});
-        }
-
-        if(!user.isVerified){
-            return res.json({success:false , message:'You are not verified'});
-        }
-
-            const k =await bcrypt.compare(oldPassword , user.password);
-        if(!k){
-                return res.json({success:false , message:'Wrong password'});
-
-        }
-        const hashedPassword = await bcrypt.hash(newPassword,10);
-        user.password = hashedPassword;
-        await user.save();
-        return res.json({success:true , message:'Password Changed'});
-       
-
-    }
-    catch(err){
-        res.json({success:false ,message:err.message});
-    }
-}
 
 export const sendResetOtp= async(req,res)=>{
     try{
-        const {userId} = req.user;
+        const {email} = req.body;
 
-        const user = await usermodel.findById(userId);
+        const user = await usermodel.findOne({email});
 
         if(!user.isVerified){
             return res.json({success:false , mesage:'You are not verified user '})
@@ -244,37 +212,37 @@ export const sendResetOtp= async(req,res)=>{
     }
 } 
 
-export const resetPassword = async(req,res)=>{
-    const {userId} = req.user;
-    const {newPassword , otp} = req.body;
+// export const resetPassword = async(req,res)=>{
+//     const {userId} = req.user;
+//     const {newPassword , otp} = req.body;
 
-    if(!otp || !newPassword){
-        return res.json({success:false , message:'Missing Verification Details'});
-    }
+//     if(!otp || !newPassword){
+//         return res.json({success:false , message:'Missing Verification Details'});
+//     }
 
-    try{
-    const user = await usermodel.findById(userId);
-    if(!user){
-        return res.json({success:false , message:'User doesnot exist'});
-    }
+//     try{
+//     const user = await usermodel.findById(userId);
+//     if(!user){
+//         return res.json({success:false , message:'User doesnot exist'});
+//     }
 
-    const hashedPassword = await bcrypt.hash(newPassword , 10);
-    if(Date.now() > user.resetOtpExpireAt){
-                return res.json({success:false , message:'otp expired'});
-    }
+//     const hashedPassword = await bcrypt.hash(newPassword , 10);
+//     if(Date.now() > user.resetOtpExpireAt){
+//                 return res.json({success:false , message:'otp expired'});
+//     }
 
-    user.password = hashedPassword;
-    user.resetOtp='';
-    user.resetOtpExpireAt=0;
+//     user.password = hashedPassword;
+//     user.resetOtp='';
+//     user.resetOtpExpireAt=0;
 
-    await user.save();
+//     await user.save();
 
-    res.json({success:true , message:'Password changed '})
-    }
-    catch(err){
-        res.json({success:false , message:err.message});
-    }
-}
+//     res.json({success:true , message:'Password changed '})
+//     }
+//     catch(err){
+//         res.json({success:false , message:err.message});
+//     }
+// }
 
 export const isVerified=async(req,res)=>{
     const {userId} = req.user;

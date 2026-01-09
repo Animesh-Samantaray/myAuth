@@ -17,7 +17,7 @@ return res.json({
   userData: {
     name: user.name,
     email: user.email,
-    isAccountVerified: user.isVerified,
+    isVerified: user.isVerified,
   }
 });
 

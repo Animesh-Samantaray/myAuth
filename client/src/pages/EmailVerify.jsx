@@ -11,11 +11,8 @@ const EmailVerify = () => {
   const navigate = useNavigate();
    const {backendUrl,isLoggedIn,userData,getUserData} = useContext(AppContext);
 
-// useEffect(() => {
-//   if (isLoggedIn && userData && userData.isVerified) {
-//     navigate('/');
-//   }
-// }, [isLoggedIn, userData, navigate]);
+
+
 
 
 
@@ -37,12 +34,12 @@ const sendVerificationOtp = async(req,res)=>{
 
 const verifyEmailMethod = async(e)=>{
   try{
-      e.preventDefault();
+        e.preventDefault();
         axios.defaults.withCredentials=true;
         const   { data } = await axios.post(`${backendUrl}/api/auth/verify-email`, {otp:val}, { withCredentials: true });
 
         if(data.success){
-          await getUserData();
+          getUserData();
           toast.success(data.message);
           navigate('/');
         }
